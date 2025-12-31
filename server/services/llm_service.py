@@ -1,7 +1,7 @@
 import asyncio
 import json
 import os
-from typing import Literal, Optional
+from typing import List, Literal, Optional
 
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -44,7 +44,11 @@ def _get_openai_client() -> OpenAI:
     return _openai_client
 
 
-async def evaluate_medical_policy(policy_text: str, patient_note: str) -> PolicyDecision:
+async def evaluate_medical_policy(
+    policy_text: str,
+    patient_note: str,
+    entities: Optional[List[str]] = None,
+) -> PolicyDecision:
     """Compare patient note against policy and return a validated decision."""
     if not policy_text or not patient_note:
         raise ValueError("Both policy_text and patient_note are required.")
@@ -55,7 +59,10 @@ async def evaluate_medical_policy(policy_text: str, patient_note: str) -> Policy
         "You are a Medical Auditor. Compare the Patient Note against the Policy. "
         "Respond with valid JSON only: {status: 'APPROVED'|'DENIED', reason: '...'}"
     )
-    user_prompt = f"Policy:\n{policy_text}\n\nPatient Note:\n{patient_note}\n"
+    entities_section = f"\n\nDetected Entities:\n{entities}" if entities else ""
+    user_prompt = (
+        f"Policy:\n{policy_text}\n\nPatient Note:\n{patient_note}{entities_section}\n"
+    )
 
     response = await asyncio.to_thread(
         client.chat.completions.create,
