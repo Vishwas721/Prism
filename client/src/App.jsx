@@ -142,8 +142,8 @@ const App = () => {
         <div className="brand">
           <span className="logo">⚕️</span>
           <div>
-            <p className="title">AuthFlow Sentinel</p>
-            <p className="subtitle">Prism Medical Review Dashboard</p>
+            <p className="title">PRISM</p>
+            <p className="subtitle">Medical Review Dashboard</p>
           </div>
         </div>
         <button className="primary" onClick={handleSubmit} disabled={status === 'LOADING'}>

@@ -74,7 +74,17 @@ async def evaluate_medical_policy(
         ],
     )
 
-    content = response.choices[0].message.content if response.choices else ""
+    content = response.choices[0].message.content.strip() if response.choices else ""
+
+    # CLEANING LOGIC START: strip markdown code fences often returned by models
+    if content.startswith("```json"):
+        content = content[7:]
+    if content.startswith("```"):
+        content = content[3:]
+    if content.endswith("```"):
+        content = content[:-3]
+    content = content.strip()
+    # CLEANING LOGIC END
 
     try:
         parsed = json.loads(content)

@@ -2,18 +2,14 @@ import React from 'react'
 import clsx from 'clsx'
 
 const StatusBadge = ({ status }) => {
-  const normalized = (status || '').toUpperCase()
-  const isApproved = normalized === 'APPROVED'
-  const isDenied = normalized === 'DENIED'
+  const statusKey = status ? status.toUpperCase() : 'UNKNOWN'
 
   return (
     <span
-      className={clsx('status-badge', {
-        approved: isApproved,
-        denied: isDenied,
-      })}
+      className={clsx('status-badge', statusKey === 'APPROVED' && 'approved', statusKey === 'DENIED' && 'denied')}
+      style={{ fontSize: '1.1rem', fontWeight: 700 }}
     >
-      {normalized || 'UNKNOWN'}
+      {statusKey}
     </span>
   )
 }
