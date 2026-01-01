@@ -1,0 +1,165 @@
+[
+  {
+    "id": "case-001",
+    "patient_name": "Joe Doe",
+    "policy_id": "medicare-knee-mri",
+    "policy_name": "Medicare (CMS) - Knee MRI",
+    "status": "APPROVED",
+    "received_date": "2026-01-01T08:00:00Z",
+    "sla_hours": 72,
+    "sla_remaining_hours": 71,
+    "file_path": "uploads/Joe_Doe.pdf",
+    "analysis_result": {
+      "status": "APPROVED",
+      "reasoning": "Patient has completed 8 weeks of supervised physical therapy at Downtown Rehab. X-ray dated 12/15/2025 shows inconclusive results. All Medicare criteria satisfied.",
+      "entities_detected": [
+        "8 weeks",
+        "physical therapy",
+        "Downtown Rehab",
+        "X-ray"
+      ],
+      "evidence_quote": "Patient completed 8 weeks of supervised PT at Downtown Rehab, with X-ray on 12/15/2025 showing degenerative changes but no definitive findings.",
+      "rfi_draft": "",
+      "fhir_json": {
+        "entities": [
+          "8 weeks",
+          "physical therapy",
+          "Downtown Rehab",
+          "X-ray"
+        ]
+      }
+    }
+  },
+  {
+    "id": "case-002",
+    "patient_name": "Jane Smith",
+    "policy_id": "aetna-knee-mri",
+    "policy_name": "Aetna - Knee MRI",
+    "status": "ACTION_REQUIRED",
+    "received_date": "2026-01-01T10:30:00Z",
+    "sla_hours": 72,
+    "sla_remaining_hours": 48,
+    "file_path": "uploads/Jane_Smith.pdf",
+    "analysis_result": {
+      "status": "ACTION_REQUIRED",
+      "reasoning": "Patient has completed 4 weeks of physical therapy which meets Aetna's minimum. However, missing X-ray documentation to rule out fracture before proceeding with MRI.",
+      "entities_detected": [
+        "4 weeks",
+        "physical therapy",
+        "knee pain"
+      ],
+      "evidence_quote": "Patient reports 4 weeks of PT at HealthFirst Clinic for persistent knee pain following a fall.",
+      "rfi_draft": "Dear Dr. Smith,\n\nRe: Authorization Request for Jane Smith - Knee MRI\n\nWe are in receipt of your authorization request. To complete our review, we require the following additional documentation:\n\n- Recent X-ray imaging of the affected knee (within 90 days)\n\nThis will help us rule out fracture and ensure MRI is the appropriate next step. Please submit these documents within 48 hours to avoid delays.\n\nThank you,\nPrism Medical Review Team",
+      "fhir_json": {
+        "entities": [
+          "4 weeks",
+          "physical therapy",
+          "knee pain"
+        ]
+      }
+    }
+  },
+  {
+    "id": "case-004",
+    "patient_name": "vis",
+    "policy_id": "medicare_cms_knee_mri_2025",
+    "policy_name": "Medicare (CMS) - Knee MRI Guidelines (LCD L33456)",
+    "status": "ACTION_REQUIRED",
+    "received_date": "2026-01-01T14:55:39.379649+00:00",
+    "sla_hours": 72,
+    "sla_remaining_hours": 72,
+    "file_path": "uploads\\vis_Joe_Doe.pdf",
+    "analysis_result": {
+      "status": "ACTION_REQUIRED",
+      "reasoning": "The patient meets most criteria for chronic knee pain, including persistent pain for over 6 weeks, failure of conservative therapy with documented 8 weeks of PT, and pharmacologic failure with NSAIDs. However, the required documentation of a recent X-ray (AP, Lateral, and Sunrise views) within the last 90 days is missing. Additionally, the physical exam findings do not clearly document internal derangement (e.g., positive McMurray test, joint line tenderness, locking, or instability).",
+      "entities_detected": [
+        "45 y/o",
+        "male",
+        "31/12/25",
+        "Knee pain",
+        "ongoing",
+        "knee pain",
+        "treatment",
+        "Completed",
+        "8 weeks",
+        "PT",
+        "Ibuprofen",
+        "daily",
+        "Pain",
+        "worse",
+        "trauma",
+        "numbness",
+        "tingling",
+        "today",
+        "mild",
+        "discomfort",
+        "Knee",
+        "stable",
+        "gross exam",
+        "pain",
+        "visible",
+        "swelling",
+        "Knee pain",
+        "chronic",
+        "meniscal tear",
+        "conservative management",
+        "NSAIDs",
+        "MRI of knee",
+        "rule out",
+        "meniscal",
+        "injury",
+        "Continue",
+        "NSAIDs",
+        "Activity modification",
+        "Follow-up",
+        "imaging"
+      ],
+      "fhir_json": {
+        "entities": [
+          "45 y/o",
+          "male",
+          "31/12/25",
+          "Knee pain",
+          "ongoing",
+          "knee pain",
+          "treatment",
+          "Completed",
+          "8 weeks",
+          "PT",
+          "Ibuprofen",
+          "daily",
+          "Pain",
+          "worse",
+          "trauma",
+          "numbness",
+          "tingling",
+          "today",
+          "mild",
+          "discomfort",
+          "Knee",
+          "stable",
+          "gross exam",
+          "pain",
+          "visible",
+          "swelling",
+          "Knee pain",
+          "chronic",
+          "meniscal tear",
+          "conservative management",
+          "NSAIDs",
+          "MRI of knee",
+          "rule out",
+          "meniscal",
+          "injury",
+          "Continue",
+          "NSAIDs",
+          "Activity modification",
+          "Follow-up",
+          "imaging"
+        ]
+      },
+      "rfi_draft": "Draft a polite, professional email to Dr. John Doe requesting the specific missing document (recent X-ray of the knee with AP, Lateral, and Sunrise views performed within the last 90 days and physical exam findings suggestive of internal derangement) to satisfy Policy CMS LOCAL COVERAGE DETERMINATION (LCD): MRI OF THE KNEE (L33456).",
+      "evidence_quote": "Pt reports ongoing knee pain, says it's been 'about the same' despite treatment. Completed 8 weeks of PT at Downtown Rehab, no real improvement noted. Taking Ibuprofen daily (OTC, dose not clearly stated). Pain worse with walking and stairs."
+    }
+  }
+]

@@ -263,6 +263,265 @@ label {
   min-height: 120px;
 }
 
+/* Dashboard styles */
+
+.dashboard-main {
+  width: 100%;
+}
+
+.table-container {
+  overflow-x: auto;
+  margin-top: 12px;
+}
+
+.patient-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.patient-table thead {
+  background: #f8fafc;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.patient-table th {
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 13px;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.patient-table td {
+  padding: 14px 12px;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 14px;
+}
+
+.clickable-row {
+  cursor: pointer;
+  transition: background 100ms ease;
+}
+
+.clickable-row:hover {
+  background: #f8fafc;
+}
+
+.case-id {
+  font-family: 'SFMono-Regular', 'Consolas', monospace;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.patient-name {
+  font-weight: 600;
+}
+
+.policy-name {
+  color: #64748b;
+  font-size: 13px;
+}
+
+.received-date {
+  color: #64748b;
+  font-size: 13px;
+}
+
+.sla-normal {
+  color: #10b981;
+  font-weight: 600;
+}
+
+.sla-warning {
+  color: #f59e0b;
+  font-weight: 600;
+}
+
+.sla-urgent {
+  color: #ef4444;
+  font-weight: 700;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.table-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.badge-approved {
+  background: #10b98133;
+  color: #047857;
+  border: 1px solid #10b98155;
+}
+
+.badge-denied {
+  background: #f43f5e22;
+  color: #b91c1c;
+  border: 1px solid #f43f5e55;
+}
+
+.badge-action {
+  background: #fef3c7;
+  color: #b45309;
+  border: 1px solid #fcd34d;
+}
+
+.badge-pending {
+  background: #e2e8f0;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+}
+
+/* Modal styles */
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(2px);
+}
+
+.modal-content {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.3);
+  width: 90%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #64748b;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: background 100ms ease;
+}
+
+.modal-close:hover {
+  background: #f1f5f9;
+}
+
+.modal-body {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.modal-footer {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  padding: 16px 20px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.secondary {
+  background: #fff;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+
+.secondary:hover {
+  background: #f8fafc;
+}
+
+.input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+/* Case detail styles */
+
+.back-button {
+  background: none;
+  border: none;
+  color: #2563eb;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: background 100ms ease;
+  margin-right: 12px;
+}
+
+.back-button:hover {
+  background: #e0ecff;
+}
+
+.case-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.info-label {
+  font-weight: 600;
+  color: #64748b;
+  min-width: 140px;
+}
+
 .error-text {
   color: #b91c1c;
   font-weight: 600;
