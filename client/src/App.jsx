@@ -23,6 +23,7 @@ const App = () => {
   const [entities, setEntities] = useState([])
   const [fhir, setFhir] = useState({})
   const [reasoning, setReasoning] = useState('')
+  const [evidence, setEvidence] = useState('')
   const [rfiDraft, setRfiDraft] = useState('')
   const [toast, setToast] = useState('')
   const [scanIndex, setScanIndex] = useState(0)
@@ -51,6 +52,7 @@ const App = () => {
     setReasoning('')
     setEntities([])
     setFhir({})
+    setEvidence('')
     setRfiDraft('')
 
     const formData = new FormData()
@@ -74,6 +76,7 @@ const App = () => {
       setReasoning(data.reasoning || '')
       setEntities(data.entities_detected || [])
       setFhir(data.fhir_json || {})
+      setEvidence(data.evidence_quote || '')
       setRfiDraft(data.rfi_draft || '')
     } catch (error) {
       console.error(error)
@@ -116,6 +119,12 @@ const App = () => {
             <p className="result-label">AI Decision Engine</p>
           </div>
           <p className="reasoning">{reasoning || 'No reasoning returned.'}</p>
+          {evidence && (
+            <div className="evidence-block">
+              <div className="evidence-label">🔎 Source Evidence:</div>
+              <div className="evidence-text">“{evidence}”</div>
+            </div>
+          )}
           {decisionStatus === 'ACTION_REQUIRED' && (
             <div className="section">
               <h4 className="section-title">Suggested RFI Draft</h4>
@@ -160,7 +169,7 @@ const App = () => {
     }
 
     return <p className="muted">{message}</p>
-  }, [status, scanIndex, reasoning, entities, fhir, message, decisionStatus, rfiDraft, toast])
+  }, [status, scanIndex, reasoning, entities, fhir, message, decisionStatus, rfiDraft, toast, evidence])
 
   return (
     <div className="page">

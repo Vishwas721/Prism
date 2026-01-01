@@ -9,3 +9,4 @@ class AnalysisResult(BaseModel):
     entities_detected: List[str] = Field(default_factory=list)
     fhir_json: Dict[str, Any] = Field(default_factory=dict)
     rfi_draft: str = ""
+    evidence_quote: str = ""

@@ -17,6 +17,7 @@ class PolicyDecision(BaseModel):
     status: Literal["APPROVED", "DENIED", "ACTION_REQUIRED", "UNKNOWN"]
     reason: str = Field(..., min_length=1)
     rfi_draft: str = Field(default="")
+    evidence_quote: str = Field(default="")
 
     @validator("status", pre=True)
     def normalize_status(cls, value: str) -> str:  # noqa: D401
@@ -58,10 +59,10 @@ async def evaluate_medical_policy(
 
     system_prompt = (
         "You are a Medical Auditor. Compare the Patient Note against the Policy. "
-        "If the patient meets some criteria but is missing specific required documentation (like X-rays or specific dates), "
-        "return status: 'ACTION_REQUIRED'. In the 'reasoning' field, explain what is missing. Add a new JSON field 'rfi_draft': "
-        "'Draft a polite, professional email to Dr. [Provider Name] requesting the specific missing document to satisfy Policy [Policy Name].' "
-        "Otherwise, respond with valid JSON only: {status: 'APPROVED'|'DENIED'|'ACTION_REQUIRED', reason: '...', rfi_draft: '...'}"
+        "If the patient meets some criteria but is missing specific required documentation (like X-rays or specific dates), return status: 'ACTION_REQUIRED'. "
+        "In the 'reasoning' field, explain what is missing. Add a new JSON field 'rfi_draft': 'Draft a polite, professional email to Dr. [Provider Name] requesting the specific missing document to satisfy Policy [Policy Name].'. "
+        "For every decision, you MUST extract the exact direct quote from the patient note that supports your finding. Return this in a new JSON field called 'evidence_quote'. "
+        "Respond with valid JSON only: {status: 'APPROVED'|'DENIED'|'ACTION_REQUIRED', reason: '...', rfi_draft: '...', evidence_quote: '...'}"
     )
     entities_section = f"\n\nDetected Entities:\n{entities}" if entities else ""
     user_prompt = (
@@ -100,4 +101,5 @@ async def evaluate_medical_policy(
         status="UNKNOWN",
         reason=(content or "Empty model response").strip(),
         rfi_draft="",
+        evidence_quote="",
     )

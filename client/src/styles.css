@@ -268,6 +268,28 @@ label {
   font-weight: 600;
 }
 
+.evidence-block {
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: 12px;
+  background: #e0f2fe;
+  border: 1px solid #bae6fd;
+}
+
+.evidence-label {
+  font-weight: 700;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.evidence-text {
+  font-style: italic;
+  color: #334155;
+}
+
 .scanner {
   position: relative;
   border: 1px solid #cbd5e1;

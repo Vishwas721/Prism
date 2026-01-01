@@ -38,4 +38,5 @@ async def analyze_document(file: UploadFile = File(...), policy_text: str = Form
         entities_detected=entities,
         fhir_json={"entities": entities},
         rfi_draft=decision.rfi_draft,
+        evidence_quote=decision.evidence_quote,
     )
