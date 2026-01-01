@@ -1,0 +1,20 @@
+[
+  {
+    "id": "medicare-knee-mri",
+    "name": "Medicare (CMS) - Knee MRI",
+    "description": "Strict policy requiring comprehensive documentation",
+    "text": "Medicare Knee MRI Authorization Policy:\n\nREQUIRED CRITERIA (ALL must be met):\n1. Documentation of knee pain lasting at least 6 weeks\n2. Completion of at least 6 weeks of supervised physical therapy at an accredited facility\n3. Recent X-ray imaging (within 90 days) showing inconclusive results\n4. Failed conservative treatment including NSAIDs or prescribed pain management\n5. Detailed provider notes documenting functional limitations\n6. Clear clinical indication for MRI (suspected meniscal tear, ligament injury, or cartilage damage)\n\nDENIAL CRITERIA:\n- Missing X-ray documentation\n- Less than 6 weeks of physical therapy\n- Lack of conservative treatment attempts\n- Insufficient provider documentation"
+  },
+  {
+    "id": "aetna-knee-mri",
+    "name": "Aetna - Knee MRI",
+    "description": "Lenient policy with flexibility for acute injuries",
+    "text": "Aetna Knee MRI Authorization Policy:\n\nREQUIRED CRITERIA:\n1. Documentation of knee pain or injury\n2. At least 4 weeks of physical therapy OR acute injury with significant mechanism (sports injury, fall, trauma)\n3. Provider clinical examination notes\n4. One failed conservative treatment modality (PT, NSAIDs, bracing, or injections)\n\nSPECIAL CONSIDERATIONS:\n- X-rays NOT required for acute injuries with clear mechanism\n- Expedited review for suspected ligament tears in athletes\n- 4 weeks PT minimum (reduced from standard 6 weeks)\n\nAPPROVAL likely if:\n- Acute injury documented with mechanism\n- At least 4 weeks PT completed\n- Provider suspects structural damage\n\nDENIAL only if:\n- No conservative treatment attempted\n- Insufficient clinical documentation"
+  },
+  {
+    "id": "uhc-knee-mri",
+    "name": "UnitedHealthcare - Knee MRI",
+    "description": "Standard policy balancing thoroughness and access",
+    "text": "UnitedHealthcare Knee MRI Authorization Policy:\n\nREQUIRED CRITERIA:\n1. Persistent knee pain for at least 4-6 weeks\n2. Completion of at least 4-6 weeks of physical therapy at licensed facility\n3. Failed trial of conservative management (NSAIDs, activity modification, or bracing)\n4. Provider examination documenting objective findings (swelling, limited ROM, positive McMurray, etc.)\n5. X-ray recommended but not strictly required if acute injury present\n\nAPPROVAL CRITERIA:\n- 4-6 weeks documented physical therapy\n- Provider notes supporting medical necessity\n- Failed conservative treatment\n- Clinical suspicion of internal derangement\n\nDENIAL CRITERIA:\n- Less than 4 weeks conservative treatment\n- Inadequate documentation\n- No objective clinical findings"
+  }
+]

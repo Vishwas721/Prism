@@ -5,6 +5,7 @@ import clsx from 'clsx'
 import FileUpload from './components/FileUpload'
 import StatusBadge from './components/StatusBadge'
 import JsonViewer from './components/JsonViewer'
+import PolicySelector from './components/PolicySelector'
 
 const scanningSteps = [
   'Extracting OCR...',
@@ -15,7 +16,7 @@ const scanningSteps = [
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
 const App = () => {
-  const [policy, setPolicy] = useState('Knee MRI')
+  const [policy, setPolicy] = useState('')
   const [file, setFile] = useState(null)
   const [status, setStatus] = useState('IDLE')
   const [decisionStatus, setDecisionStatus] = useState('UNKNOWN')
@@ -57,7 +58,7 @@ const App = () => {
 
     const formData = new FormData()
     formData.append('file', file)
-    formData.append('policy_text', policy)
+    formData.append('policy_id', policy)
 
     const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
@@ -194,15 +195,11 @@ const App = () => {
           </div>
           <div className="field">
             <label htmlFor="policy">Select Policy</label>
-            <select
-              id="policy"
+            <PolicySelector
               value={policy}
-              onChange={(e) => setPolicy(e.target.value)}
-              className="select"
-            >
-              <option value="Knee MRI">Knee MRI</option>
-              <option value="Spinal Fusion">Spinal Fusion</option>
-            </select>
+              onChange={setPolicy}
+              disabled={status === 'LOADING'}
+            />
           </div>
           <FileUpload onFileSelected={onFileSelected} disabled={status === 'LOADING'} />
           {file && <p className="muted">Selected: {file.name}</p>}

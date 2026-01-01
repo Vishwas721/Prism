@@ -3,15 +3,22 @@ import logging
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 
 from models import AnalysisResult
-from services import entity_service, llm_service, ocr_service
+from services import entity_service, llm_service, ocr_service, policy_service
 
 router = APIRouter(prefix="/api", tags=["analyze"])
 logger = logging.getLogger("prism.analyze")
 
 
 @router.post("/analyze", response_model=AnalysisResult)
-async def analyze_document(file: UploadFile = File(...), policy_text: str = Form(...)):
-    # Step 0: Read file
+async def analyze_document(file: UploadFile = File(...), policy_id: str = Form(...)):
+    # Step 0: Fetch policy text
+    try:
+        policy_text = policy_service.get_policy_text(policy_id)
+    except ValueError as exc:
+        logger.exception("Invalid policy ID")
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    # Step 1: Read file
     try:
         file_bytes = await file.read()
     except Exception as exc:  # pragma: no cover - runtime I/O
