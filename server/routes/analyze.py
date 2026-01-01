@@ -37,4 +37,5 @@ async def analyze_document(file: UploadFile = File(...), policy_text: str = Form
         reasoning=decision.reason,
         entities_detected=entities,
         fhir_json={"entities": entities},
+        rfi_draft=decision.rfi_draft,
     )

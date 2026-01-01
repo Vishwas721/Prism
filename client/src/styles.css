@@ -210,6 +210,12 @@ label {
   border: 1px solid #f43f5e55;
 }
 
+.status-badge.action-required {
+  background: #fef3c7;
+  color: #b45309;
+  border: 1px solid #fcd34d;
+}
+
 .result-card {
   display: flex;
   flex-direction: column;
@@ -244,6 +250,17 @@ label {
   overflow: auto;
   max-height: 220px;
   border: 1px solid #1e293b;
+}
+
+.textarea {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 14px;
+  font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  resize: vertical;
+  min-height: 120px;
 }
 
 .error-text {

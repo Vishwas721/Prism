@@ -14,8 +14,9 @@ MODEL_NAME = "gpt-4o"
 
 
 class PolicyDecision(BaseModel):
-    status: Literal["APPROVED", "DENIED", "UNKNOWN"]
+    status: Literal["APPROVED", "DENIED", "ACTION_REQUIRED", "UNKNOWN"]
     reason: str = Field(..., min_length=1)
+    rfi_draft: str = Field(default="")
 
     @validator("status", pre=True)
     def normalize_status(cls, value: str) -> str:  # noqa: D401
@@ -23,7 +24,7 @@ class PolicyDecision(BaseModel):
         if not isinstance(value, str):
             return "UNKNOWN"
         value_upper = value.strip().upper()
-        if value_upper in {"APPROVED", "DENIED"}:
+        if value_upper in {"APPROVED", "DENIED", "ACTION_REQUIRED"}:
             return value_upper
         return "UNKNOWN"
 
@@ -57,7 +58,10 @@ async def evaluate_medical_policy(
 
     system_prompt = (
         "You are a Medical Auditor. Compare the Patient Note against the Policy. "
-        "Respond with valid JSON only: {status: 'APPROVED'|'DENIED', reason: '...'}"
+        "If the patient meets some criteria but is missing specific required documentation (like X-rays or specific dates), "
+        "return status: 'ACTION_REQUIRED'. In the 'reasoning' field, explain what is missing. Add a new JSON field 'rfi_draft': "
+        "'Draft a polite, professional email to Dr. [Provider Name] requesting the specific missing document to satisfy Policy [Policy Name].' "
+        "Otherwise, respond with valid JSON only: {status: 'APPROVED'|'DENIED'|'ACTION_REQUIRED', reason: '...', rfi_draft: '...'}"
     )
     entities_section = f"\n\nDetected Entities:\n{entities}" if entities else ""
     user_prompt = (
@@ -92,4 +96,8 @@ async def evaluate_medical_policy(
     except (json.JSONDecodeError, ValueError):
         pass
 
-    return PolicyDecision(status="UNKNOWN", reason=(content or "Empty model response").strip())
+    return PolicyDecision(
+        status="UNKNOWN",
+        reason=(content or "Empty model response").strip(),
+        rfi_draft="",
+    )

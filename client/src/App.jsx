@@ -23,6 +23,8 @@ const App = () => {
   const [entities, setEntities] = useState([])
   const [fhir, setFhir] = useState({})
   const [reasoning, setReasoning] = useState('')
+  const [rfiDraft, setRfiDraft] = useState('')
+  const [toast, setToast] = useState('')
   const [scanIndex, setScanIndex] = useState(0)
 
   useEffect(() => {
@@ -49,6 +51,7 @@ const App = () => {
     setReasoning('')
     setEntities([])
     setFhir({})
+    setRfiDraft('')
 
     const formData = new FormData()
     formData.append('file', file)
@@ -66,16 +69,22 @@ const App = () => {
 
       const data = response.data
       setStatus('SUCCESS')
-       setDecisionStatus((data.status || 'UNKNOWN').toUpperCase())
+      setDecisionStatus((data.status || 'UNKNOWN').toUpperCase())
       setMessage('Decision ready')
       setReasoning(data.reasoning || '')
       setEntities(data.entities_detected || [])
       setFhir(data.fhir_json || {})
+      setRfiDraft(data.rfi_draft || '')
     } catch (error) {
       console.error(error)
       setStatus('ERROR')
       setMessage('Failed to analyze document')
     }
+  }
+
+  const handleSendRfi = () => {
+    setToast('Sent!')
+    setTimeout(() => setToast(''), 1500)
   }
 
   const statusContent = useMemo(() => {
@@ -107,6 +116,23 @@ const App = () => {
             <p className="result-label">AI Decision Engine</p>
           </div>
           <p className="reasoning">{reasoning || 'No reasoning returned.'}</p>
+          {decisionStatus === 'ACTION_REQUIRED' && (
+            <div className="section">
+              <h4 className="section-title">Suggested RFI Draft</h4>
+              <textarea
+                className="textarea"
+                value={rfiDraft}
+                onChange={(e) => setRfiDraft(e.target.value)}
+                rows={6}
+              />
+              <div className="section" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <button className="primary" onClick={handleSendRfi}>
+                  Send Request to Provider
+                </button>
+                {toast && <span className="pill" style={{ background: '#ecfeff', color: '#0ea5e9' }}>{toast}</span>}
+              </div>
+            </div>
+          )}
           <div className="section">
             <h4 className="section-title">Entities Detected</h4>
             {entities.length ? (
@@ -134,7 +160,7 @@ const App = () => {
     }
 
     return <p className="muted">{message}</p>
-  }, [status, scanIndex, reasoning, entities, fhir, message])
+  }, [status, scanIndex, reasoning, entities, fhir, message, decisionStatus, rfiDraft, toast])
 
   return (
     <div className="page">
