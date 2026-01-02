@@ -114,11 +114,39 @@ const CaseDetail = () => {
       <main
         style={{
           display: 'grid',
-          gridTemplateColumns: showPdf ? '1fr 1fr' : '1fr',
+          gridTemplateColumns: '1fr 1fr',
           gap: '16px',
           alignItems: 'flex-start',
         }}
       >
+        <section className="card" style={{ height: 'calc(100vh - 180px)' }}>
+          <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h3>Patient Document</h3>
+            {showPdf && <span className="muted" style={{ fontSize: '0.9rem' }}>{patient.file_path}</span>}
+          </div>
+          {showPdf && fileUrl ? (
+            <iframe
+              src={fileUrl}
+              title="Patient Document"
+              style={{ width: '100%', height: '100%', border: '1px solid #e5e7eb', borderRadius: '12px' }}
+            />
+          ) : (
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                height: '100%',
+                color: '#6b7280',
+                fontSize: '1.1rem',
+                textAlign: 'center',
+              }}
+            >
+              <p>👉 Click an evidence link below to verify the source document</p>
+            </div>
+          )}
+        </section>
+
         <section className="card">
           <div className="card-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
             <div>
@@ -179,7 +207,7 @@ const CaseDetail = () => {
                   <div className="evidence-label">
                     🔎 {showPdf ? 'Evidence Quote (Verified)' : 'Evidence Quote - Click to Verify'}
                   </div>
-                  <div className="evidence-text">"{result.evidence_quote}"</div>
+                  <div className="evidence-text">“{result.evidence_quote}”</div>
                 </div>
               )}
 
@@ -236,30 +264,6 @@ const CaseDetail = () => {
             </div>
           )}
         </section>
-
-        {showPdf && (
-          <section className="card" style={{ height: 'calc(100vh - 180px)' }}>
-            <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h3>Source Document</h3>
-              <button
-                className="secondary"
-                onClick={() => setShowPdf(false)}
-                style={{ padding: '4px 8px', fontSize: '0.9rem' }}
-              >
-                ✕ Close
-              </button>
-            </div>
-            {fileUrl ? (
-              <iframe
-                src={fileUrl}
-                title="Patient Document"
-                style={{ width: '100%', height: '100%', border: '1px solid #e5e7eb', borderRadius: '12px' }}
-              />
-            ) : (
-              <p className="muted">File not available.</p>
-            )}
-          </section>
-        )}
       </main>
     </div>
   )
