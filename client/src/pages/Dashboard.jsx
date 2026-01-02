@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   useReactTable,
   getCoreRowModel,
@@ -11,6 +11,9 @@ import {
 } from '@tanstack/react-table'
 import FileUpload from '../components/FileUpload'
 import PolicySelector from '../components/PolicySelector'
+import LoadingSpinner, { SkeletonRow } from '../components/LoadingSpinner'
+import EmptyState from '../components/EmptyState'
+import { useToast } from '../components/Toast'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
@@ -19,16 +22,35 @@ const PulseIndicator = ({ color = '#ef4444' }) => (
   <motion.span
     animate={{ opacity: [1, 0.4, 1] }}
     transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
-    style={{
-      display: 'inline-block',
-      width: 8,
-      height: 8,
-      borderRadius: '50%',
-      backgroundColor: color,
-      marginRight: 8,
-    }}
+    className="pulse-dot"
+    style={{ backgroundColor: color }}
   />
 )
+
+// Status filter tabs
+const StatusFilter = ({ active, onChange, counts }) => {
+  const tabs = [
+    { key: 'all', label: 'All Cases', count: counts.all, className: 'tab-all' },
+    { key: 'pending', label: 'Pending', count: counts.pending, className: 'tab-pending' },
+    { key: 'action', label: 'Action Required', count: counts.action, className: 'tab-action' },
+    { key: 'approved', label: 'Approved', count: counts.approved, className: 'tab-approved' },
+  ]
+
+  return (
+    <div className="status-filter-tabs">
+      {tabs.map(tab => (
+        <button
+          key={tab.key}
+          className={`status-filter-tab ${tab.className} ${active === tab.key ? 'active' : ''}`}
+          onClick={() => onChange(tab.key)}
+        >
+          {tab.label}
+          <span className="tab-count">{tab.count}</span>
+        </button>
+      ))}
+    </div>
+  )
+}
 
 const Dashboard = () => {
   const [patients, setPatients] = useState([])
@@ -36,14 +58,17 @@ const Dashboard = () => {
   const [showModal, setShowModal] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [globalFilter, setGlobalFilter] = useState('')
-  const [sorting, setSorting] = useState([])
+  const [statusFilter, setStatusFilter] = useState('all')
+  const [sorting, setSorting] = useState([{ id: 'sla_remaining_hours', desc: false }])
   
   // New case form state
   const [patientName, setPatientName] = useState('')
   const [policyId, setPolicyId] = useState('')
   const [file, setFile] = useState(null)
+  const [formErrors, setFormErrors] = useState({})
   
   const navigate = useNavigate()
+  const toast = useToast()
 
   useEffect(() => {
     fetchPatients()
@@ -58,21 +83,31 @@ const Dashboard = () => {
       setPatients(response.data)
     } catch (error) {
       console.error('Failed to load patients:', error)
+      toast.error('Failed to load cases. Please refresh the page.')
     } finally {
       setLoading(false)
     }
   }
 
+  const validateForm = () => {
+    const errors = {}
+    if (!patientName.trim()) errors.patientName = 'Patient name is required'
+    if (!policyId) errors.policyId = 'Please select a policy'
+    if (!file) errors.file = 'Please upload a document'
+    setFormErrors(errors)
+    return Object.keys(errors).length === 0
+  }
+
   const handleUploadCase = async () => {
-    if (!patientName || !policyId || !file) {
-      alert('Please fill all fields and select a file')
+    if (!validateForm()) {
+      toast.warning('Please fill in all required fields')
       return
     }
 
     setUploading(true)
     const formData = new FormData()
     formData.append('file', file)
-    formData.append('patient_name', patientName)
+    formData.append('patient_name', patientName.trim())
     formData.append('policy_id', policyId)
 
     try {
@@ -84,17 +119,46 @@ const Dashboard = () => {
       setPatientName('')
       setPolicyId('')
       setFile(null)
+      setFormErrors({})
       setShowModal(false)
       
       // Refresh patient list
       fetchPatients()
+      toast.success(`Case created for ${patientName}`)
     } catch (error) {
       console.error('Failed to upload case:', error)
-      alert('Failed to upload case')
+      toast.error('Failed to upload case. Please try again.')
     } finally {
       setUploading(false)
     }
   }
+
+  const closeModal = () => {
+    setShowModal(false)
+    setPatientName('')
+    setPolicyId('')
+    setFile(null)
+    setFormErrors({})
+  }
+
+  // Computed counts for status filter
+  const statusCounts = useMemo(() => ({
+    all: patients.length,
+    pending: patients.filter(p => p.status === 'PENDING').length,
+    action: patients.filter(p => p.status === 'ACTION_REQUIRED').length,
+    approved: patients.filter(p => p.status === 'APPROVED').length,
+  }), [patients])
+
+  // Filter patients by status
+  const filteredPatients = useMemo(() => {
+    if (statusFilter === 'all') return patients
+    const statusMap = {
+      pending: 'PENDING',
+      action: 'ACTION_REQUIRED',
+      approved: 'APPROVED',
+    }
+    return patients.filter(p => p.status === statusMap[statusFilter])
+  }, [patients, statusFilter])
 
   const getStatusBadgeClass = (status) => {
     const normalized = (status || '').toUpperCase()
@@ -240,7 +304,7 @@ const Dashboard = () => {
 
   // Create table instance
   const table = useReactTable({
-    data: patients,
+    data: filteredPatients,
     columns,
     state: {
       sorting,
@@ -254,25 +318,55 @@ const Dashboard = () => {
     globalFilterFn: 'includesString',
   })
 
+  // Full page loading state
   if (loading) {
     return (
       <div className="page">
-        <p className="muted">Loading cases...</p>
+        <header className="header">
+          <div className="brand">
+            <h1 className="title" style={{ fontSize: 22, fontWeight: 700 }}>
+              Prism <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>/</span> Nurse Queue
+            </h1>
+          </div>
+        </header>
+        <main className="dashboard-main">
+          <div className="table-container">
+            <table className="patient-table">
+              <thead>
+                <tr>
+                  <th>Case ID</th>
+                  <th>Patient</th>
+                  <th>Policy Type</th>
+                  <th>Received</th>
+                  <th>SLA Status</th>
+                  <th>AI Assessment</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[...Array(5)].map((_, i) => <SkeletonRow key={i} />)}
+              </tbody>
+            </table>
+          </div>
+        </main>
       </div>
     )
   }
 
   return (
     <div className="page">
-      <header className="header" style={{ borderBottom: 'none', paddingBottom: 0 }}>
-        <div className="brand">
-          <div>
-            <p className="title" style={{ fontSize: 22, fontWeight: 700, letterSpacing: -0.5 }}>
-              Prism <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>/</span> Nurse Queue
-            </p>
-          </div>
+      {/* Header */}
+      <header className="dashboard-header">
+        <div className="header-left">
+          <h1 className="dashboard-title">
+            <span className="title-prism">Prism</span>
+            <span className="title-divider">/</span>
+            <span className="title-section">Nurse Queue</span>
+          </h1>
+          <p className="dashboard-subtitle">
+            {patients.length} cases • {statusCounts.action} require attention
+          </p>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div className="header-right">
           <div className="table-search">
             <svg className="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="11" cy="11" r="8"/>
@@ -280,17 +374,36 @@ const Dashboard = () => {
             </svg>
             <input
               type="text"
-              placeholder="Search cases..."
+              placeholder="Search by name or ID..."
               value={globalFilter}
               onChange={(e) => setGlobalFilter(e.target.value)}
               className="search-input"
             />
+            {globalFilter && (
+              <button 
+                className="search-clear" 
+                onClick={() => setGlobalFilter('')}
+                aria-label="Clear search"
+              >
+                ✕
+              </button>
+            )}
           </div>
-          <button className="primary" onClick={() => setShowModal(true)} style={{ borderRadius: 20, padding: '10px 20px' }}>
+          <button className="btn-new-case" onClick={() => setShowModal(true)}>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
             New Case
           </button>
         </div>
       </header>
+
+      {/* Status Filter Tabs */}
+      <StatusFilter 
+        active={statusFilter} 
+        onChange={setStatusFilter} 
+        counts={statusCounts}
+      />
 
       <main className="dashboard-main">
         <div className="table-container">
@@ -312,23 +425,40 @@ const Dashboard = () => {
             <tbody>
               {table.getRowModel().rows.length === 0 ? (
                 <tr>
-                  <td colSpan={columns.length} style={{ textAlign: 'center', padding: 40, color: 'var(--text-secondary)' }}>
-                    {globalFilter ? 'No cases match your search' : 'No cases found'}
+                  <td colSpan={columns.length}>
+                    <EmptyState
+                      icon={globalFilter ? 'search' : 'folder'}
+                      title={globalFilter ? 'No matching cases' : 'No cases yet'}
+                      description={
+                        globalFilter 
+                          ? `No cases match "${globalFilter}". Try a different search.`
+                          : 'Upload your first patient case to get started with AI-powered analysis.'
+                      }
+                      action={
+                        !globalFilter && (
+                          <button className="btn-new-case" onClick={() => setShowModal(true)}>
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                              <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                            </svg>
+                            Create First Case
+                          </button>
+                        )
+                      }
+                    />
                   </td>
                 </tr>
               ) : (
-                table.getRowModel().rows.map(row => (
+                table.getRowModel().rows.map((row, index) => (
                   <motion.tr
                     key={row.id}
                     onClick={() => navigate(`/case/${row.original.id}`)}
                     className="clickable-row"
-                    initial={{ opacity: 0, y: 10 }}
+                    initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.2 }}
+                    transition={{ duration: 0.2, delay: index * 0.03 }}
                     whileHover={{ 
-                      scale: 1.005, 
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-                      transition: { duration: 0.15 }
+                      backgroundColor: '#f8fafc',
+                      transition: { duration: 0.1 }
                     }}
                   >
                     {row.getVisibleCells().map(cell => (
@@ -371,55 +501,137 @@ const Dashboard = () => {
       </main>
 
       {/* New Case Modal */}
-      {showModal && (
-        <div className="modal-overlay" onClick={() => setShowModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3>Upload New Case</h3>
-              <button className="modal-close" onClick={() => setShowModal(false)}>
-                ✕
-              </button>
-            </div>
-            
-            <div className="modal-body">
-              <div className="field">
-                <label>Patient Name</label>
-                <input
-                  type="text"
-                  className="input"
-                  value={patientName}
-                  onChange={(e) => setPatientName(e.target.value)}
-                  placeholder="e.g., John Doe"
-                />
+      <AnimatePresence>
+        {showModal && (
+          <motion.div 
+            className="modal-overlay" 
+            onClick={closeModal}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <motion.div 
+              className="modal-content" 
+              onClick={(e) => e.stopPropagation()}
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ duration: 0.2 }}
+            >
+              <div className="modal-header">
+                <div>
+                  <h3>Create New Case</h3>
+                  <p className="modal-subtitle">Upload patient documentation for AI analysis</p>
+                </div>
+                <button className="modal-close" onClick={closeModal} aria-label="Close modal">
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M5 5l10 10M15 5l-10 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                  </svg>
+                </button>
+              </div>
+              
+              <div className="modal-body">
+                <div className={`field ${formErrors.patientName ? 'field-error' : ''}`}>
+                  <label htmlFor="patientName">
+                    Patient Name <span className="required">*</span>
+                  </label>
+                  <input
+                    id="patientName"
+                    type="text"
+                    className="input"
+                    value={patientName}
+                    onChange={(e) => {
+                      setPatientName(e.target.value)
+                      if (formErrors.patientName) setFormErrors(prev => ({ ...prev, patientName: '' }))
+                    }}
+                    placeholder="Enter patient's full name"
+                    disabled={uploading}
+                  />
+                  {formErrors.patientName && (
+                    <span className="field-error-text">{formErrors.patientName}</span>
+                  )}
+                </div>
+
+                <div className={`field ${formErrors.policyId ? 'field-error' : ''}`}>
+                  <label htmlFor="policyId">
+                    Insurance Policy <span className="required">*</span>
+                  </label>
+                  <PolicySelector 
+                    value={policyId} 
+                    onChange={(val) => {
+                      setPolicyId(val)
+                      if (formErrors.policyId) setFormErrors(prev => ({ ...prev, policyId: '' }))
+                    }}
+                    disabled={uploading}
+                  />
+                  {formErrors.policyId && (
+                    <span className="field-error-text">{formErrors.policyId}</span>
+                  )}
+                </div>
+
+                <div className={`field ${formErrors.file ? 'field-error' : ''}`}>
+                  <label>
+                    Patient Document <span className="required">*</span>
+                  </label>
+                  <FileUpload 
+                    onFileSelected={(f) => {
+                      setFile(f)
+                      if (formErrors.file) setFormErrors(prev => ({ ...prev, file: '' }))
+                    }} 
+                    disabled={uploading} 
+                  />
+                  {file && (
+                    <div className="file-selected">
+                      <div className="file-selected-info">
+                        <span className="file-selected-icon">📄</span>
+                        <div>
+                          <div className="file-selected-name">{file.name}</div>
+                          <div className="file-selected-size">{(file.size / 1024).toFixed(1)} KB</div>
+                        </div>
+                      </div>
+                      <button 
+                        className="file-remove" 
+                        onClick={() => setFile(null)}
+                        aria-label="Remove file"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  )}
+                  {formErrors.file && (
+                    <span className="field-error-text">{formErrors.file}</span>
+                  )}
+                </div>
               </div>
 
-              <div className="field">
-                <label>Select Policy</label>
-                <PolicySelector value={policyId} onChange={setPolicyId} />
+              <div className="modal-footer">
+                <button 
+                  className="btn-secondary" 
+                  onClick={closeModal}
+                  disabled={uploading}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="btn-primary"
+                  onClick={handleUploadCase}
+                  disabled={uploading}
+                >
+                  {uploading ? (
+                    <>
+                      <LoadingSpinner size={16} inline />
+                      Uploading...
+                    </>
+                  ) : (
+                    'Create Case'
+                  )}
+                </button>
               </div>
-
-              <div className="field">
-                <label>Upload Patient Document</label>
-                <FileUpload onFileSelected={setFile} disabled={uploading} />
-                {file && <p className="muted">Selected: {file.name}</p>}
-              </div>
-            </div>
-
-            <div className="modal-footer">
-              <button className="secondary" onClick={() => setShowModal(false)}>
-                Cancel
-              </button>
-              <button
-                className="primary"
-                onClick={handleUploadCase}
-                disabled={uploading || !patientName || !policyId || !file}
-              >
-                {uploading ? 'Uploading...' : 'Upload Case'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

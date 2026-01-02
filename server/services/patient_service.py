@@ -50,6 +50,8 @@ def create_patient_case(
         "sla_remaining_hours": sla_hours,
         "file_path": file_path,
         "analysis_result": None,
+        "rfi_sent": False,
+        "rfi_sent_at": None,
     }
     
     patients.append(new_case)
@@ -66,6 +68,21 @@ def update_patient_analysis(patient_id: str, analysis_result: Dict) -> Dict:
         if patient.get("id") == patient_id:
             patient["analysis_result"] = analysis_result
             patient["status"] = analysis_result.get("status", "UNKNOWN")
+            _save_patients(patients)
+            return patient
+    
+    raise ValueError(f"Patient case '{patient_id}' not found")
+
+
+def mark_rfi_sent(patient_id: str, message: str = "") -> Dict:
+    """Mark that an RFI has been sent for this patient case."""
+    patients = get_all_patients()
+    
+    for patient in patients:
+        if patient.get("id") == patient_id:
+            patient["rfi_sent"] = True
+            patient["rfi_sent_at"] = datetime.now(timezone.utc).isoformat()
+            patient["rfi_message"] = message
             _save_patients(patients)
             return patient
     

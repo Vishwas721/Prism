@@ -66,9 +66,14 @@ const FileUpload = ({ onFileSelected, disabled }) => {
         onClick={onClick}
       >
         <div className="drop-content">
-          <div className="icon">📄</div>
-          <p className="title">Drag & Drop PDF</p>
-          <p className="subtitle">or click to browse</p>
+          <svg className="drop-icon" width="40" height="40" viewBox="0 0 48 48" fill="none">
+            <rect x="8" y="8" width="32" height="40" rx="4" fill="#e2e8f0" stroke="#94a3b8" strokeWidth="2"/>
+            <path d="M16 24h16M16 32h12M16 40h8" stroke="#64748b" strokeWidth="2" strokeLinecap="round"/>
+            <rect x="28" y="4" width="16" height="16" rx="8" fill="#4F46E5"/>
+            <path d="M36 9v6M33 12h6" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+          </svg>
+          <p className="drop-title">Drag & Drop PDF</p>
+          <p className="drop-subtitle">or click to browse files</p>
         </div>
       </div>
     </div>

@@ -6,6 +6,7 @@ import FileUpload from '../components/FileUpload'
 import StatusBadge from '../components/StatusBadge'
 import JsonViewer from '../components/JsonViewer'
 import PolicySelector from '../components/PolicySelector'
+import { useToast } from '../components/Toast'
 
 const scanningSteps = [
   'Extracting OCR...',
@@ -15,7 +16,8 @@ const scanningSteps = [
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
-const App = () => {
+const QuickAnalysis = () => {
+  const toast = useToast()
   const [policy, setPolicy] = useState('')
   const [file, setFile] = useState(null)
   const [status, setStatus] = useState('IDLE')
@@ -26,7 +28,6 @@ const App = () => {
   const [reasoning, setReasoning] = useState('')
   const [evidence, setEvidence] = useState('')
   const [rfiDraft, setRfiDraft] = useState('')
-  const [toast, setToast] = useState('')
   const [scanIndex, setScanIndex] = useState(0)
 
   useEffect(() => {
@@ -87,8 +88,7 @@ const App = () => {
   }
 
   const handleSendRfi = () => {
-    setToast('Sent!')
-    setTimeout(() => setToast(''), 1500)
+    toast.success('Request for Information sent successfully!')
   }
 
   const statusContent = useMemo(() => {
@@ -135,11 +135,10 @@ const App = () => {
                 onChange={(e) => setRfiDraft(e.target.value)}
                 rows={6}
               />
-              <div className="section" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <div className="section" style={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: 12 }}>
                 <button className="primary" onClick={handleSendRfi}>
                   Send Request to Provider
                 </button>
-                {toast && <span className="pill" style={{ background: '#ecfeff', color: '#0ea5e9' }}>{toast}</span>}
               </div>
             </div>
           )}
@@ -170,7 +169,7 @@ const App = () => {
     }
 
     return <p className="muted">{message}</p>
-  }, [status, scanIndex, reasoning, entities, fhir, message, decisionStatus, rfiDraft, toast, evidence])
+  }, [status, scanIndex, reasoning, entities, fhir, message, decisionStatus, rfiDraft, evidence])
 
   return (
     <div className="page">
@@ -217,4 +216,4 @@ const App = () => {
   )
 }
 
-export default App
+export default QuickAnalysis

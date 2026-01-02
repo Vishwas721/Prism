@@ -39,6 +39,24 @@ async def get_patient(patient_id: str):
         raise HTTPException(status_code=500, detail="Failed to retrieve patient") from exc
 
 
+@router.post("/patients/{patient_id}/send-rfi")
+async def send_rfi(patient_id: str, message: str = Form("")):
+    """Mark that an RFI has been sent for this patient case."""
+    try:
+        patient = patient_service.get_patient_by_id(patient_id)
+        if not patient:
+            raise HTTPException(status_code=404, detail=f"Patient case '{patient_id}' not found")
+        
+        updated = patient_service.mark_rfi_sent(patient_id, message)
+        logger.info(f"RFI sent for case {patient_id}")
+        return {"success": True, "patient": updated}
+    except HTTPException:
+        raise
+    except Exception as exc:
+        logger.exception(f"Failed to send RFI for patient {patient_id}")
+        raise HTTPException(status_code=500, detail="Failed to send RFI") from exc
+
+
 @router.post("/upload")
 async def upload_case(
     file: UploadFile = File(...),

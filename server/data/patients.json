@@ -160,6 +160,9 @@
       },
       "rfi_draft": "Draft a polite, professional email to Dr. John Doe requesting the specific missing document (recent X-ray of the knee with AP, Lateral, and Sunrise views performed within the last 90 days and physical exam findings suggestive of internal derangement) to satisfy Policy CMS LOCAL COVERAGE DETERMINATION (LCD): MRI OF THE KNEE (L33456).",
       "evidence_quote": "Pt reports ongoing knee pain, says it's been 'about the same' despite treatment. Completed 8 weeks of PT at Downtown Rehab, no real improvement noted. Taking Ibuprofen daily (OTC, dose not clearly stated). Pain worse with walking and stairs."
-    }
+    },
+    "rfi_sent": true,
+    "rfi_sent_at": "2026-01-02T17:08:38.685274+00:00",
+    "rfi_message": "Draft a polite, professional email to Dr. John Doe requesting the specific missing document (recent X-ray of the knee with AP, Lateral, and Sunrise views performed within the last 90 days and physical exam findings suggestive of internal derangement) to satisfy Policy CMS LOCAL COVERAGE DETERMINATION (LCD): MRI OF THE KNEE (L33456)."
   }
 ]
