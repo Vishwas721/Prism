@@ -16,8 +16,15 @@ MODEL_NAME = "gpt-4o"
 class PolicyDecision(BaseModel):
     status: Literal["APPROVED", "DENIED", "ACTION_REQUIRED", "UNKNOWN"]
     reason: str = Field(..., min_length=1)
+    summary: str = Field(default="")  # One-sentence summary for UI display
     rfi_draft: str = Field(default="")
     evidence_quote: str = Field(default="")
+    # Dynamic checklist fields
+    criteria_met: bool = Field(default=False)
+    missing_criteria: str = Field(default="")
+    documentation_complete: bool = Field(default=True)
+    missing_documentation: str = Field(default="")
+    policy_match: bool = Field(default=False)
 
     @validator("status", pre=True)
     def normalize_status(cls, value: str) -> str:  # noqa: D401
@@ -58,11 +65,26 @@ async def evaluate_medical_policy(
     client = _get_openai_client()
 
     system_prompt = (
-        "You are a Medical Auditor. Compare the Patient Note against the Policy. "
-        "If the patient meets some criteria but is missing specific required documentation (like X-rays or specific dates), return status: 'ACTION_REQUIRED'. "
-        "In the 'reasoning' field, explain what is missing. Add a new JSON field 'rfi_draft': 'Draft a polite, professional email to Dr. [Provider Name] requesting the specific missing document to satisfy Policy [Policy Name].'. "
-        "For every decision, you MUST extract the exact direct quote from the patient note that supports your finding. Return this in a new JSON field called 'evidence_quote'. "
-        "Respond with valid JSON only: {status: 'APPROVED'|'DENIED'|'ACTION_REQUIRED', reason: '...', rfi_draft: '...', evidence_quote: '...'}"
+        "You are a Medical Auditor AI. Compare the Patient Note against the Policy criteria. "
+        "Analyze thoroughly and respond with a structured JSON decision.\n\n"
+        "RULES:\n"
+        "- If all criteria are met with complete documentation: status='APPROVED'\n"
+        "- If patient fails to meet medical criteria: status='DENIED'\n"
+        "- If criteria seem met but documentation is missing (e.g., X-rays, specific dates, lab results): status='ACTION_REQUIRED'\n\n"
+        "REQUIRED JSON FIELDS:\n"
+        "{\n"
+        '  "status": "APPROVED" | "DENIED" | "ACTION_REQUIRED",\n'
+        '  "summary": "One clear sentence explaining the decision (e.g., \'Patient meets criteria for knee replacement pending X-ray documentation.\')",\n'
+        '  "reason": "Detailed explanation of the decision",\n'
+        '  "criteria_met": true/false (whether clinical criteria from policy are satisfied),\n'
+        '  "missing_criteria": "If criteria_met=false, explain which specific criteria failed",\n'
+        '  "documentation_complete": true/false (whether all required docs are present),\n'
+        '  "missing_documentation": "If documentation_complete=false, list missing docs",\n'
+        '  "policy_match": true/false (whether treatment aligns with policy guidelines),\n'
+        '  "evidence_quote": "EXACT quote from patient note supporting your finding",\n'
+        '  "rfi_draft": "If ACTION_REQUIRED, draft email requesting missing info"\n'
+        "}\n\n"
+        "Respond with valid JSON only, no markdown."
     )
     entities_section = f"\n\nDetected Entities:\n{entities}" if entities else ""
     user_prompt = (
@@ -100,6 +122,12 @@ async def evaluate_medical_policy(
     return PolicyDecision(
         status="UNKNOWN",
         reason=(content or "Empty model response").strip(),
+        summary="Unable to process document",
         rfi_draft="",
         evidence_quote="",
+        criteria_met=False,
+        missing_criteria="",
+        documentation_complete=True,
+        missing_documentation="",
+        policy_match=False,
     )

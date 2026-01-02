@@ -82,10 +82,16 @@ async def analyze_document(
     result = AnalysisResult(
         status=decision.status,
         reasoning=decision.reason,
+        summary=decision.summary,
         entities_detected=entities,
         fhir_json={"entities": entities},
         rfi_draft=decision.rfi_draft,
         evidence_quote=decision.evidence_quote,
+        criteria_met=decision.criteria_met,
+        missing_criteria=decision.missing_criteria,
+        documentation_complete=decision.documentation_complete,
+        missing_documentation=decision.missing_documentation,
+        policy_match=decision.policy_match,
     )
 
     # Update patient case if patient_id provided
