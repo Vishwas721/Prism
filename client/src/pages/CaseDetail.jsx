@@ -16,6 +16,7 @@ const CaseDetail = () => {
   const [toast, setToast] = useState('')
   const [showFhir, setShowFhir] = useState(false)
   const [showPdf, setShowPdf] = useState(false)
+  const [isExporting, setIsExporting] = useState(false)
 
   useEffect(() => {
     fetchPatient()
@@ -62,6 +63,42 @@ const CaseDetail = () => {
   const handleSendRfi = () => {
     setToast('Sent!')
     setTimeout(() => setToast(''), 1500)
+  }
+
+  const handleExport = async () => {
+    setIsExporting(true)
+    
+    // Simulate processing
+    await new Promise((resolve) => setTimeout(resolve, 1500))
+    
+    if (!patient || !result?.fhir_json) {
+      alert('No FHIR data available for export')
+      setIsExporting(false)
+      return
+    }
+    
+    // Create JSON blob
+    const jsonString = JSON.stringify(result.fhir_json, null, 2)
+    const blob = new Blob([jsonString], { type: 'application/json' })
+    
+    // Generate filename
+    const filename = `${patient.id}_FHIR.json`
+    
+    // Create download link
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = filename
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+    
+    // Show success message
+    setToast('✅ FHIR Resource exported successfully!')
+    setTimeout(() => setToast(''), 3000)
+    
+    setIsExporting(false)
   }
 
   if (loading) {
@@ -199,9 +236,58 @@ const CaseDetail = () => {
               <div className="section" style={{ marginTop: 12 }}>
                 <h4 className="section-title">Actions</h4>
                 {result.status === 'APPROVED' && (
-                  <button className="primary" onClick={() => setShowFhir((prev) => !prev)}>
-                    {showFhir ? 'Hide FHIR JSON' : 'Generate FHIR JSON'}
-                  </button>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+                    <button
+                      className="primary"
+                      onClick={handleExport}
+                      disabled={isExporting}
+                      style={{
+                        background: isExporting ? '#9ca3af' : '#4f46e5',
+                        cursor: isExporting ? 'not-allowed' : 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '10px 16px',
+                        borderRadius: '8px',
+                        border: 'none',
+                        color: 'white',
+                        fontWeight: '600',
+                        fontSize: '0.95rem',
+                      }}
+                    >
+                      {isExporting ? (
+                        <>
+                          <span style={{ display: 'inline-block', animation: 'spin 1s linear infinite' }}>⚙️</span>
+                          Generating...
+                        </>
+                      ) : (
+                        <>
+                          📥 Generate FHIR Resource (HL7)
+                        </>
+                      )}
+                    </button>
+                    <button
+                      className="secondary"
+                      onClick={() => setShowFhir((prev) => !prev)}
+                      style={{
+                        padding: '10px 16px',
+                        borderRadius: '8px',
+                        border: '1px solid #d1d5db',
+                        background: '#f3f4f6',
+                        cursor: 'pointer',
+                        color: '#374151',
+                        fontWeight: '600',
+                        fontSize: '0.95rem',
+                      }}
+                    >
+                      {showFhir ? '🙈 Hide JSON' : '👁️ View JSON'}
+                    </button>
+                    {toast && (
+                      <span className="pill" style={{ background: '#ecfeff', color: '#0ea5e9', padding: '6px 12px', borderRadius: '6px', fontSize: '0.9rem' }}>
+                        {toast}
+                      </span>
+                    )}
+                  </div>
                 )}
 
                 {result.status === 'ACTION_REQUIRED' && (
