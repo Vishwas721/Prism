@@ -17,6 +17,11 @@ import { useToast } from '../components/Toast'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
+const PROVIDERS = [
+  { id: 'dr-chen', name: 'Dr. Sarah Chen', status: 'GOLD_CARD', approval_rate: 98 },
+  { id: 'dr-smith', name: 'Dr. John Smith', status: 'STANDARD', approval_rate: 75 },
+]
+
 // Pulse indicator for urgent cases
 const PulseIndicator = ({ color = '#ef4444' }) => (
   <motion.span
@@ -64,6 +69,8 @@ const Dashboard = () => {
   // New case form state
   const [patientName, setPatientName] = useState('')
   const [policyId, setPolicyId] = useState('')
+  const [providerId, setProviderId] = useState('')
+  const [slaHours, setSlaHours] = useState('72')
   const [file, setFile] = useState(null)
   const [formErrors, setFormErrors] = useState({})
   
@@ -94,6 +101,7 @@ const Dashboard = () => {
     if (!patientName.trim()) errors.patientName = 'Patient name is required'
     if (!policyId) errors.policyId = 'Please select a policy'
     if (!file) errors.file = 'Please upload a document'
+    if (!slaHours || parseInt(slaHours) <= 0) errors.slaHours = 'SLA hours must be greater than 0'
     setFormErrors(errors)
     return Object.keys(errors).length === 0
   }
@@ -109,6 +117,13 @@ const Dashboard = () => {
     formData.append('file', file)
     formData.append('patient_name', patientName.trim())
     formData.append('policy_id', policyId)
+    formData.append('sla_hours', slaHours)
+    if (providerId) {
+      formData.append('provider_id', providerId)
+    }
+    if (providerId) {
+      formData.append('provider_id', providerId)
+    }
 
     try {
       await axios.post(`${API_URL}/api/upload`, formData, {
@@ -118,6 +133,8 @@ const Dashboard = () => {
       // Reset form and close modal
       setPatientName('')
       setPolicyId('')
+      setProviderId('')
+      setSlaHours('72')
       setFile(null)
       setFormErrors({})
       setShowModal(false)
@@ -137,6 +154,8 @@ const Dashboard = () => {
     setShowModal(false)
     setPatientName('')
     setPolicyId('')
+    setProviderId('')
+    setSlaHours('72')
     setFile(null)
     setFormErrors({})
   }
@@ -162,6 +181,7 @@ const Dashboard = () => {
 
   const getStatusBadgeClass = (status) => {
     const normalized = (status || '').toUpperCase()
+    if (normalized === 'AUTO_APPROVED') return 'badge-gold-card'
     if (normalized === 'APPROVED') return 'badge-approved'
     if (normalized === 'DENIED') return 'badge-denied'
     if (normalized === 'ACTION_REQUIRED') return 'badge-action'
@@ -170,6 +190,7 @@ const Dashboard = () => {
 
   const getStatusLabel = (status) => {
     const normalized = (status || '').toUpperCase()
+    if (normalized === 'AUTO_APPROVED') return 'Gold Card'
     if (normalized === 'ACTION_REQUIRED') return 'Action Required'
     if (normalized === 'APPROVED') return 'Approved'
     if (normalized === 'DENIED') return 'Denied'
@@ -325,7 +346,7 @@ const Dashboard = () => {
         <header className="header">
           <div className="brand">
             <h1 className="title" style={{ fontSize: 22, fontWeight: 700 }}>
-              Prism <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>/</span> Nurse Queue
+              Prism <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}></span> 
             </h1>
           </div>
         </header>
@@ -359,8 +380,8 @@ const Dashboard = () => {
         <div className="header-left">
           <h1 className="dashboard-title">
             <span className="title-prism">Prism</span>
-            <span className="title-divider">/</span>
-            <span className="title-section">Nurse Queue</span>
+            <span className="title-divider"></span>
+            <span className="title-section"></span>
           </h1>
           <p className="dashboard-subtitle">
             {patients.length} cases • {statusCounts.action} require attention
@@ -568,6 +589,58 @@ const Dashboard = () => {
                   {formErrors.policyId && (
                     <span className="field-error-text">{formErrors.policyId}</span>
                   )}
+                </div>
+
+                <div className="field">
+                  <label htmlFor="providerId">
+                    Ordering Provider <span className="optional">(Optional)</span>
+                  </label>
+                  <select
+                    id="providerId"
+                    className="input"
+                    value={providerId}
+                    onChange={(e) => setProviderId(e.target.value)}
+                    disabled={uploading}
+                  >
+                    <option value="">-- Select a provider --</option>
+                    {PROVIDERS.map(provider => (
+                      <option key={provider.id} value={provider.id}>
+                        {provider.name} {provider.status === 'GOLD_CARD' ? '⭐ (Gold Card)' : ''}
+                      </option>
+                    ))}
+                  </select>
+                  {providerId && PROVIDERS.find(p => p.id === providerId)?.status === 'GOLD_CARD' && (
+                    <div className="provider-info-badge">
+                      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                        <circle cx="7" cy="7" r="6" fill="#0EA5E9"/>
+                        <path d="M7 4v3l2 1" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+                      </svg>
+                      <span>⚡ Gold Card - Instant Approval</span>
+                    </div>
+                  )}
+                </div>
+
+                <div className={`field ${formErrors.slaHours ? 'field-error' : ''}`}>
+                  <label htmlFor="slaHours">
+                    SLA Time (hours) <span className="required">*</span>
+                  </label>
+                  <input
+                    id="slaHours"
+                    type="number"
+                    className="input"
+                    value={slaHours}
+                    onChange={(e) => {
+                      setSlaHours(e.target.value)
+                      if (formErrors.slaHours) setFormErrors(prev => ({ ...prev, slaHours: '' }))
+                    }}
+                    placeholder="Enter SLA hours (e.g., 24, 48, 72)"
+                    min="1"
+                    disabled={uploading}
+                  />
+                  {formErrors.slaHours && (
+                    <span className="field-error-text">{formErrors.slaHours}</span>
+                  )}
+                  <span className="optional">Standard authorization timeframe (default: 72 hours)</span>
                 </div>
 
                 <div className={`field ${formErrors.file ? 'field-error' : ''}`}>

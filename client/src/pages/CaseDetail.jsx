@@ -235,6 +235,7 @@ const CaseDetail = () => {
   // Status badge styles
   const getStatusStyle = (status) => {
     const normalized = (status || '').toUpperCase()
+    if (normalized === 'AUTO_APPROVED') return { bg: '#0EA5E9', icon: '⚡' }
     if (normalized === 'APPROVED') return { bg: '#059669', icon: '✓' }
     if (normalized === 'DENIED') return { bg: '#dc2626', icon: '✕' }
     if (normalized === 'ACTION_REQUIRED') return { bg: '#d97706', icon: '!' }
@@ -293,7 +294,13 @@ const CaseDetail = () => {
               className={`status-chip status-${patient.status?.toLowerCase().replace('_', '-')}`}
             >
               <span className="status-icon">{statusStyle.icon}</span>
-              <span>{patient.status === 'ACTION_REQUIRED' ? 'Action Required' : patient.status}</span>
+              <span>
+                {patient.status === 'ACTION_REQUIRED' 
+                  ? 'Action Required' 
+                  : patient.status === 'AUTO_APPROVED' 
+                  ? 'Gold Card' 
+                  : patient.status}
+              </span>
             </div>
           </motion.section>
 

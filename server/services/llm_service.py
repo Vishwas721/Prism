@@ -17,13 +17,13 @@ class PolicyDecision(BaseModel):
     status: Literal["APPROVED", "DENIED", "ACTION_REQUIRED", "UNKNOWN"]
     reason: str = Field(..., min_length=1)
     summary: str = Field(default="")  # One-sentence summary for UI display
-    rfi_draft: str = Field(default="")
+    rfi_draft: Optional[str] = Field(default="")
     evidence_quote: str = Field(default="")
     # Dynamic checklist fields
     criteria_met: bool = Field(default=False)
-    missing_criteria: str = Field(default="")
+    missing_criteria: Optional[str] = Field(default="")
     documentation_complete: bool = Field(default=True)
-    missing_documentation: str = Field(default="")
+    missing_documentation: Optional[str] = Field(default="")
     policy_match: bool = Field(default=False)
 
     @validator("status", pre=True)
@@ -35,6 +35,13 @@ class PolicyDecision(BaseModel):
         if value_upper in {"APPROVED", "DENIED", "ACTION_REQUIRED"}:
             return value_upper
         return "UNKNOWN"
+
+    @validator("rfi_draft", "missing_criteria", "missing_documentation", pre=True)
+    def default_empty_strings(cls, value):  # noqa: D401
+        """Coerce None to empty string for optional text fields."""
+        if value is None:
+            return ""
+        return value
 
 
 def _get_openai_client() -> OpenAI:
@@ -116,8 +123,22 @@ async def evaluate_medical_policy(
     try:
         parsed = json.loads(content)
         return PolicyDecision.parse_obj(parsed)
-    except (json.JSONDecodeError, ValueError):
-        pass
+    except (json.JSONDecodeError, ValueError) as e:
+        # Log the parsing error for debugging
+        print(f"JSON Parse Error: {e}")
+        print(f"Raw content (first 500 chars): {content[:500]}")
+        
+        # Try to extract JSON if it's nested in the response
+        try:
+            # Sometimes the model returns {"reasoning": "{...actual json...}"}
+            if isinstance(parsed := json.loads(content), dict) and len(parsed) == 1:
+                # If there's only one key, try to parse its value as JSON
+                inner_value = list(parsed.values())[0]
+                if isinstance(inner_value, str):
+                    inner_parsed = json.loads(inner_value)
+                    return PolicyDecision.parse_obj(inner_parsed)
+        except:
+            pass
 
     return PolicyDecision(
         status="UNKNOWN",

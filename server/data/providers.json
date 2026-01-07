@@ -1,0 +1,18 @@
+[
+  {
+    "id": "dr-chen",
+    "name": "Dr. Sarah Chen",
+    "status": "GOLD_CARD",
+    "exemption": "TX-HB-3459",
+    "approval_rate": 98,
+    "specialty": "Orthopedic Surgery"
+  },
+  {
+    "id": "dr-smith",
+    "name": "Dr. John Smith",
+    "status": "STANDARD",
+    "exemption": null,
+    "approval_rate": 75,
+    "specialty": "Internal Medicine"
+  }
+]

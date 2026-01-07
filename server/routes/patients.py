@@ -62,6 +62,8 @@ async def upload_case(
     file: UploadFile = File(...),
     patient_name: str = Form(...),
     policy_id: str = Form(...),
+    provider_id: str = Form(None),
+    sla_hours: int = Form(72),
 ):
     """Upload a new patient case file."""
     try:
@@ -87,12 +89,14 @@ async def upload_case(
         with file_path.open("wb") as buffer:
             buffer.write(content)
         
-        # Create patient case entry
+        # Create patient case entry (with optional provider_id for fast lane)
         case = patient_service.create_patient_case(
             patient_name=patient_name,
             policy_id=policy_id,
             policy_name=policy.get("name", ""),
             file_path=str(file_path.relative_to(Path(__file__).parent.parent)),
+            provider_id=provider_id,
+            sla_hours=sla_hours,
         )
         
         logger.info(f"Created new case {case['id']} for {patient_name}")

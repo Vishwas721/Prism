@@ -627,6 +627,21 @@ label {
   border-color: #d1fae5;
 }
 
+.badge-gold-card {
+  background: linear-gradient(135deg, #DBEAFE 0%, #BAE6FD 100%);
+  color: #0369A1;
+  border-color: #7DD3FC;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.badge-gold-card::before {
+  content: '⚡';
+  font-size: 14px;
+}
+
 .badge-denied {
   background: #fee2e2;
   color: #b91c1c;
@@ -1100,6 +1115,16 @@ label {
 
 .status-chip.status-approved .status-icon {
   background: #059669;
+}
+
+.status-chip.status-auto-approved {
+  background: linear-gradient(135deg, #DBEAFE 0%, #BAE6FD 100%);
+  color: #0369A1;
+  border: 2px solid #7DD3FC;
+}
+
+.status-chip.status-auto-approved .status-icon {
+  background: #0EA5E9;
 }
 
 .status-chip.status-denied {
@@ -3074,6 +3099,30 @@ label {
 
 .required {
   color: #dc2626;
+}
+
+.optional {
+  color: var(--text-tertiary);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.provider-info-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: linear-gradient(135deg, #DBEAFE 0%, #BAE6FD 100%);
+  border: 1px solid #7DD3FC;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #0369A1;
+  margin-top: 8px;
+}
+
+.provider-info-badge svg {
+  flex-shrink: 0;
 }
 
 /* ========================================
