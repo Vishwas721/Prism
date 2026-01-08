@@ -75,6 +75,7 @@ const CaseDetail = () => {
   const [rfiSending, setRfiSending] = useState(false)
   const [rfiSent, setRfiSent] = useState(false)
   const [showTemplates, setShowTemplates] = useState(false)
+  const [showAllEntities, setShowAllEntities] = useState(false)
 
   useEffect(() => {
     fetchPatient()
@@ -496,18 +497,31 @@ const CaseDetail = () => {
                     <span className="entity-count">{result.entities_detected.length} found</span>
                   </div>
                   <div className="entity-chips">
-                    {result.entities_detected.map((entity, idx) => (
-                      <motion.span 
-                        key={idx} 
-                        className="entity-chip"
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: 0.3 + idx * 0.05 }}
-                      >
-                        {entity}
-                      </motion.span>
-                    ))}
+                    {result.entities_detected
+                      .slice(0, showAllEntities ? result.entities_detected.length : 10)
+                      .map((entity, idx) => (
+                        <motion.span 
+                          key={idx} 
+                          className="entity-chip"
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ delay: 0.3 + idx * 0.05 }}
+                        >
+                          {entity}
+                        </motion.span>
+                      ))}
                   </div>
+                  {result.entities_detected.length > 10 && (
+                    <motion.button
+                      className="expand-entities-btn"
+                      onClick={() => setShowAllEntities(!showAllEntities)}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.5 }}
+                    >
+                      {showAllEntities ? '← Show Less' : `+ View All (${result.entities_detected.length} total)`}
+                    </motion.button>
+                  )}
                 </motion.section>
               )}
 

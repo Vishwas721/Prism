@@ -98,7 +98,6 @@ const Dashboard = () => {
 
   const validateForm = () => {
     const errors = {}
-    if (!patientName.trim()) errors.patientName = 'Patient name is required'
     if (!policyId) errors.policyId = 'Please select a policy'
     if (!file) errors.file = 'Please upload a document'
     if (!slaHours || parseInt(slaHours) <= 0) errors.slaHours = 'SLA hours must be greater than 0'
@@ -115,7 +114,9 @@ const Dashboard = () => {
     setUploading(true)
     const formData = new FormData()
     formData.append('file', file)
-    formData.append('patient_name', patientName.trim())
+    if (patientName.trim()) {
+      formData.append('patient_name', patientName.trim())
+    }
     formData.append('policy_id', policyId)
     formData.append('sla_hours', slaHours)
     if (providerId) {
@@ -126,7 +127,7 @@ const Dashboard = () => {
     }
 
     try {
-      await axios.post(`${API_URL}/api/upload`, formData, {
+      const response = await axios.post(`${API_URL}/api/upload`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       })
       
@@ -141,7 +142,8 @@ const Dashboard = () => {
       
       // Refresh patient list
       fetchPatients()
-      toast.success(`Case created for ${patientName}`)
+      const resolvedName = response?.data?.patient_name || patientName || 'new case'
+      toast.success(`Case created for ${resolvedName}`)
     } catch (error) {
       console.error('Failed to upload case:', error)
       toast.error('Failed to upload case. Please try again.')
@@ -553,9 +555,9 @@ const Dashboard = () => {
               </div>
               
               <div className="modal-body">
-                <div className={`field ${formErrors.patientName ? 'field-error' : ''}`}>
+                <div className="field">
                   <label htmlFor="patientName">
-                    Patient Name <span className="required">*</span>
+                    Patient Name <span className="optional">(Optional – auto-extracted from document if left blank)</span>
                   </label>
                   <input
                     id="patientName"
@@ -564,14 +566,10 @@ const Dashboard = () => {
                     value={patientName}
                     onChange={(e) => {
                       setPatientName(e.target.value)
-                      if (formErrors.patientName) setFormErrors(prev => ({ ...prev, patientName: '' }))
                     }}
-                    placeholder="Enter patient's full name"
+                    placeholder="Enter patient's full name (or leave blank)"
                     disabled={uploading}
                   />
-                  {formErrors.patientName && (
-                    <span className="field-error-text">{formErrors.patientName}</span>
-                  )}
                 </div>
 
                 <div className={`field ${formErrors.policyId ? 'field-error' : ''}`}>

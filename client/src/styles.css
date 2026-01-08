@@ -1491,6 +1491,31 @@ label {
   box-shadow: 0 4px 12px rgba(14, 165, 233, 0.2);
 }
 
+.expand-entities-btn {
+  margin-top: 12px;
+  padding: 10px 16px;
+  background: #f1f5f9;
+  color: #0369A1;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 150ms ease;
+  font-family: inherit;
+}
+
+.expand-entities-btn:hover {
+  background: #e2e8f0;
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(51, 65, 85, 0.1);
+}
+
+.expand-entities-btn:active {
+  transform: translateY(0);
+}
+
 /* ===== Quick Actions ===== */
 .quick-actions {
   display: flex;
